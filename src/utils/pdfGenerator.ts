@@ -114,23 +114,6 @@ export function generateQuotePDF(form: QuoteFormState, calc: QuoteCalculation) {
     currentY += 5.5;
   });
 
-  // Additional Surcharges if any
-  if (form.isUrgent || form.noUtilities) {
-    currentY += 4;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Adicionales aplicados:', 18, currentY);
-    currentY += 6;
-    doc.setFont('helvetica', 'normal');
-    if (form.isUrgent) {
-      doc.text(`• Servicio de urgencia (para el día siguiente, +20%): ${formatCurrency(calc.urgentAmount)}`, 22, currentY);
-      currentY += 5.5;
-    }
-    if (form.noUtilities) {
-      doc.text(`• Inmueble sin servicio de luz / agua habilitado: ${formatCurrency(calc.noUtilitiesAmount)}`, 22, currentY);
-      currentY += 5.5;
-    }
-  }
-
   // Pricing Box
   currentY = Math.max(currentY + 6, 180);
   doc.setFillColor(241, 245, 249);
@@ -184,4 +167,172 @@ export function generateQuotePDF(form: QuoteFormState, calc: QuoteCalculation) {
   // Trigger download
   const safeClientName = (form.clientName || 'Cliente').replace(/[^a-zA-Z0-9]/g, '_');
   doc.save(`Presupuesto_${safeClientName}_${Date.now().toString().slice(-4)}.pdf`);
+}
+
+/**
+ * Genera el Catálogo / Folleto comercial de los 7 servicios
+ * con opción de incluir o no los precios.
+ */
+export function generateCatalogPDF(showPrices: boolean = true) {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  // Header background
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.rect(0, 0, 210, 36, 'F');
+
+  // Brand title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('LIMPIEZA PROFESIONAL', 14, 16);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(45, 212, 191); // teal-400
+  doc.text('CATÁLOGO DE SERVICIOS INTEGRALES  •  MENDOZA', 14, 23);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('Insumos de primera línea, maquinaria profesional y personal capacitado.', 14, 29);
+
+  // Top info strip
+  doc.setFillColor(241, 245, 249);
+  doc.rect(0, 36, 210, 9, 'F');
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(71, 85, 105);
+  doc.text('• Insumos y traslados incluidos en Gran Mendoza   • Seña 50% reserva de fecha   • Facturación y garantía', 14, 42);
+
+  // 2-Column Grid Layout for 7 services
+  // Left column: 3 services (Limpieza profunda, Obra liviana, Obra pesada)
+  // Right column: 4 services (Post mudanza, Oficina, Mantenimiento, Vidrios)
+  const leftColX = 12;
+  const rightColX = 109;
+  const colWidth = 89;
+
+  const leftServices = SERVICE_PACKAGES.slice(0, 3);
+  const rightServices = SERVICE_PACKAGES.slice(3, 7);
+
+  // Render left column
+  let currentY = 48;
+  leftServices.forEach((pkg) => {
+    const cardHeight = 62;
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(leftColX, currentY, colWidth, cardHeight, 2, 2, 'FD');
+
+    // Title & Price
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 118, 110); // teal-700
+    doc.text(pkg.name.toUpperCase(), leftColX + 4, currentY + 7);
+
+    if (showPrices) {
+      doc.setFillColor(254, 243, 199); // amber-100
+      doc.roundedRect(leftColX + colWidth - 28, currentY + 3, 24, 6, 1, 1, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(120, 53, 15); // amber-900
+      doc.text(`${formatCurrency(pkg.fixedPrice)}`, leftColX + colWidth - 26, currentY + 7.5);
+    }
+
+    // Subtitle features
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(71, 85, 105);
+    doc.text(`${pkg.features}`, leftColX + 4, currentY + 13);
+
+    // Divider
+    doc.setDrawColor(226, 232, 240);
+    doc.line(leftColX + 4, currentY + 16, leftColX + colWidth - 4, currentY + 16);
+
+    // Items
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    let itemY = currentY + 21;
+    pkg.details.slice(0, 5).forEach((d) => {
+      doc.text(`✓ ${d}`, leftColX + 5, itemY);
+      itemY += 4.5;
+    });
+
+    currentY += cardHeight + 4;
+  });
+
+  // Render right column
+  currentY = 48;
+  rightServices.forEach((pkg) => {
+    const cardHeight = 46;
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(rightColX, currentY, colWidth, cardHeight, 2, 2, 'FD');
+
+    // Title & Price
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 118, 110);
+    doc.text(pkg.name.toUpperCase(), rightColX + 4, currentY + 7);
+
+    if (showPrices) {
+      doc.setFillColor(254, 243, 199);
+      doc.roundedRect(rightColX + colWidth - 30, currentY + 3, 26, 6, 1, 1, 'F');
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(120, 53, 15);
+      const priceText = `${formatCurrency(pkg.fixedPrice)}${pkg.unitLabel ? ' /v' : ''}`;
+      doc.text(priceText, rightColX + colWidth - 28, currentY + 7.5);
+    }
+
+    // Subtitle features
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(71, 85, 105);
+    doc.text(`${pkg.features}`, rightColX + 4, currentY + 13);
+
+    // Divider
+    doc.setDrawColor(226, 232, 240);
+    doc.line(rightColX + 4, currentY + 16, rightColX + colWidth - 4, currentY + 16);
+
+    // Items
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    let itemY = currentY + 21;
+    pkg.details.slice(0, 4).forEach((d) => {
+      doc.text(`✓ ${d}`, rightColX + 5, itemY);
+      itemY += 4.5;
+    });
+
+    currentY += cardHeight + 4;
+  });
+
+  // Bottom CTA & Contact Banner
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.roundedRect(12, 252, 186, 32, 2, 2, 'F');
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('¿DUDAS SOBRE QUÉ SERVICIO SE ADAPTA A TU INMUEBLE?', 18, 261);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('Envíanos fotos o la ubicación de tu propiedad y te asesoramos al instante sin compromiso.', 18, 267);
+  doc.text('Coordinamos visitas de relevamiento técnico para obras y oficinas comerciales.', 18, 273);
+
+  doc.setFillColor(13, 148, 136); // teal-600
+  doc.roundedRect(18, 276, 75, 6, 1, 1, 'F');
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('CONSULTAS Y RESERVAS POR WHATSAPP', 21, 280.5);
+
+  const priceSuffix = showPrices ? 'ConPrecios' : 'Informativo';
+  doc.save(`Catalogo_Servicios_Limpieza_${priceSuffix}.pdf`);
 }

@@ -30,7 +30,7 @@ import {
 } from './data/packages';
 import { calculateQuote } from './utils/calculator';
 import { formatCurrency, generateWhatsAppMessage } from './utils/formatters';
-import { generateQuotePDF } from './utils/pdfGenerator';
+import { generateQuotePDF, generateCatalogPDF } from './utils/pdfGenerator';
 
 interface SavedQuote extends QuoteFormState {
   id: string;
@@ -300,6 +300,37 @@ export function App() {
                     onChange={e => setForm({ ...form, clientAddress: e.target.value })}
                     className="w-full text-sm px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
                   />
+                </div>
+              </div>
+
+              {/* Guía rápida para asesorar al cliente */}
+              <div className="bg-teal-50/70 border border-teal-200/90 rounded-2xl p-4 text-xs space-y-2">
+                <div className="flex items-center gap-2 text-teal-900 font-bold">
+                  <Sparkles className="w-4 h-4 text-teal-600" />
+                  <span>Guía rápida: ¿Qué servicio ofrecerle según lo que pide?</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-teal-950">
+                  <div 
+                    onClick={() => setForm(prev => ({ ...prev, serviceType: 'package', packageId: 'post-mudanza' }))}
+                    className="bg-white p-2.5 rounded-xl border border-teal-200/70 hover:border-teal-500 cursor-pointer transition-all shadow-2xs"
+                  >
+                    <strong className="block text-teal-800 mb-0.5">📦 Post Mudanza</strong>
+                    Inmueble vacío, entrega de llaves o alquiler recién desocupado.
+                  </div>
+                  <div 
+                    onClick={() => setForm(prev => ({ ...prev, serviceType: 'package', packageId: 'obra-liviana' }))}
+                    className="bg-white p-2.5 rounded-xl border border-teal-200/70 hover:border-teal-500 cursor-pointer transition-all shadow-2xs"
+                  >
+                    <strong className="block text-teal-800 mb-0.5">🏗️ Final de Obra</strong>
+                    Hubo albañiles, pintura o reformas (polvo o cemento).
+                  </div>
+                  <div 
+                    onClick={() => setForm(prev => ({ ...prev, serviceType: 'package', packageId: 'limpieza-profunda' }))}
+                    className="bg-white p-2.5 rounded-xl border border-teal-200/70 hover:border-teal-500 cursor-pointer transition-all shadow-2xs"
+                  >
+                    <strong className="block text-teal-800 mb-0.5">✨ Limpieza Profunda</strong>
+                    Casa o depto habitado que necesita desengrase y puesta a fondo.
+                  </div>
                 </div>
               </div>
 
@@ -637,6 +668,38 @@ export function App() {
                 <span>Validez 7 días</span>
                 <span>•</span>
                 <span className="text-teal-300 font-semibold">Seña 50% para reservar</span>
+              </div>
+            </div>
+
+            {/* Catalog Download Actions */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-teal-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-teal-600" />
+                  Descargar Folleto Comercial para Clientes (PDF)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Folleto diseñado para enviar por WhatsApp a clientes que piden información general de los 7 servicios.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => generateCatalogPDF(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition-all"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Catálogo con Precios (PDF)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => generateCatalogPDF(false)}
+                  className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-all"
+                >
+                  <Download className="w-3.5 h-3.5 text-slate-600" />
+                  Folleto sin Precios (PDF)
+                </button>
               </div>
             </div>
 
