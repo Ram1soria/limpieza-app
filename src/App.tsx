@@ -12,7 +12,12 @@ import {
   Trash2, 
   Search, 
   Check, 
-  Send 
+  Send,
+  Building2,
+  Home,
+  CalendarCheck,
+  Layers,
+  Briefcase
 } from 'lucide-react';
 
 import type { QuoteFormState, QuoteCalculation } from './types';
@@ -32,6 +37,27 @@ interface SavedQuote extends QuoteFormState {
   calculatedTotal: number;
   calculatedDeposit: number;
 }
+
+const getPackageIcon = (id: string, isSelected: boolean) => {
+  const iconClass = isSelected ? "w-4 h-4 text-teal-300" : "w-4 h-4 text-slate-600";
+  switch (id) {
+    case 'limpieza-profunda':
+      return <Sparkles className={iconClass} />;
+    case 'obra-liviana':
+    case 'obra-pesada':
+      return <Building2 className={isSelected ? "w-4 h-4 text-amber-400" : "w-4 h-4 text-slate-600"} />;
+    case 'mantenimiento-semanal':
+      return <CalendarCheck className={iconClass} />;
+    case 'post-mudanza':
+      return <Home className={isSelected ? "w-4 h-4 text-emerald-400" : "w-4 h-4 text-slate-600"} />;
+    case 'oficina-comercio':
+      return <Briefcase className={isSelected ? "w-4 h-4 text-sky-400" : "w-4 h-4 text-slate-600"} />;
+    case 'vidrios-solos':
+      return <Layers className={isSelected ? "w-4 h-4 text-cyan-400" : "w-4 h-4 text-slate-600"} />;
+    default:
+      return <Sparkles className={iconClass} />;
+  }
+};
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'cotizador' | 'tarifario' | 'historial' | 'ajustes'>('cotizador');
@@ -266,13 +292,13 @@ export function App() {
                   </h2>
                   
                   {/* Mode Selector */}
-                  <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium self-start sm:self-auto">
+                  <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-medium self-start sm:self-auto border border-slate-200/80">
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, serviceType: 'package' })}
-                      className={`px-3 py-1 rounded-lg transition-all ${
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
                         form.serviceType === 'package' 
-                          ? 'bg-white text-teal-700 shadow-sm font-semibold' 
+                          ? 'bg-slate-900 text-white shadow-sm font-semibold' 
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
@@ -281,9 +307,9 @@ export function App() {
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, serviceType: 'custom' })}
-                      className={`px-3 py-1 rounded-lg transition-all ${
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
                         form.serviceType === 'custom' 
-                          ? 'bg-white text-teal-700 shadow-sm font-semibold' 
+                          ? 'bg-slate-900 text-white shadow-sm font-semibold' 
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
@@ -301,30 +327,46 @@ export function App() {
                         <div
                           key={pkg.id}
                           onClick={() => setForm({ ...form, packageId: pkg.id })}
-                          className={`p-3.5 rounded-xl border cursor-pointer transition-all relative flex flex-col justify-between ${
+                          className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all duration-200 relative flex flex-col justify-between ${
                             isSelected 
-                              ? 'border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 shadow-sm' 
-                              : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
+                              ? 'bg-slate-900 text-white border-teal-500 shadow-md ring-2 ring-teal-500/20 scale-[1.01]' 
+                              : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-teal-200/70 shadow-sm'
                           }`}
                         >
                           <div>
-                            <div className="flex items-start justify-between gap-1 mb-1">
-                              <h3 className="text-sm font-bold text-slate-900">{pkg.name}</h3>
-                              {isSelected && (
-                                <span className="bg-teal-600 text-white p-0.5 rounded-full">
-                                  <Check className="w-3 h-3" />
+                            <div className="flex items-start justify-between gap-1 mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                                  {getPackageIcon(pkg.id, isSelected)}
+                                </div>
+                                <h3 className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                                  {pkg.name}
+                                </h3>
+                              </div>
+                              {isSelected ? (
+                                <span className="bg-teal-500 text-white p-0.5 rounded-full shadow-sm">
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" />
                                 </span>
+                              ) : (
+                                <span className="w-4 h-4 rounded-full border border-slate-300 mt-0.5" />
                               )}
                             </div>
-                            <p className="text-xs text-slate-500 font-medium mb-2">{pkg.features}</p>
+                            <p className={`text-xs font-medium mb-3 ml-7 ${isSelected ? 'text-teal-300' : 'text-slate-500'}`}>
+                              {pkg.features}
+                            </p>
                           </div>
-                          <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                            <span className="text-xs text-slate-500">
+
+                          <div className={`pt-2.5 border-t flex items-center justify-between ml-1 ${isSelected ? 'border-slate-800' : 'border-slate-100'}`}>
+                            <span className={`text-xs ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
                               {pkg.defaultPeople} pers • {pkg.defaultHours} hs
                             </span>
-                            <span className="text-sm font-bold text-slate-900">
+                            <span className={`text-sm font-black px-2.5 py-0.5 rounded-md ${
+                              isSelected 
+                                ? 'bg-amber-400 text-slate-950 shadow-sm' 
+                                : 'bg-amber-100 text-amber-900 border border-amber-200'
+                            }`}>
                               {formatCurrency(pkg.fixedPrice)}
-                              {pkg.unitLabel && <span className="text-xs font-normal text-slate-500">{pkg.unitLabel}</span>}
+                              {pkg.unitLabel && <span className="text-[10px] font-normal"> {pkg.unitLabel}</span>}
                             </span>
                           </div>
                         </div>
