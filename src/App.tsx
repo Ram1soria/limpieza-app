@@ -8,10 +8,7 @@ import {
   Copy, 
   Download, 
   CheckCircle2, 
-  AlertTriangle, 
   Users, 
-  Zap, 
-  Droplet, 
   Trash2, 
   Search, 
   Check, 
@@ -407,74 +404,6 @@ export function App() {
                   </div>
                 )}
               </div>
-
-              {/* Card 3: Additional Modifiers & Rules */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-3">
-                <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-bold">3</span>
-                  Adicionales y Modificadores
-                </h2>
-
-                <div className="space-y-2">
-                  {/* Urgent toggle (+20%) */}
-                  <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50/70 cursor-pointer transition-all">
-                    <input
-                      type="checkbox"
-                      checked={form.isUrgent}
-                      onChange={e => setForm({ ...form, isUrgent: e.target.checked })}
-                      className="mt-0.5 rounded text-teal-600 focus:ring-teal-500 h-4 w-4"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                          <Zap className="w-4 h-4 text-amber-500" />
-                          Urgente para mañana (+20%)
-                        </span>
-                        {form.isUrgent && (
-                          <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-                            +{formatCurrency(calculation.urgentAmount)}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-500">Recargo por reprogramación y disponibilidad inmediata del equipo.</p>
-                    </div>
-                  </label>
-
-                  {/* No utilities toggle (+$40.000) */}
-                  <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50/70 cursor-pointer transition-all">
-                    <input
-                      type="checkbox"
-                      checked={form.noUtilities}
-                      onChange={e => setForm({ ...form, noUtilities: e.target.checked })}
-                      className="mt-0.5 rounded text-teal-600 focus:ring-teal-500 h-4 w-4"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                          <Droplet className="w-4 h-4 text-blue-500" />
-                          Inmueble sin luz o agua (+{formatCurrency(NO_UTILITIES_SURCHARGE)})
-                        </span>
-                        {form.noUtilities && (
-                          <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-                            +{formatCurrency(NO_UTILITIES_SURCHARGE)}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-500">Contempla traslado de agua, generadores o dificultades operativas.</p>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Minimum floor rule notice */}
-                {calculation.isBelowMinimum && (
-                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-start gap-2 text-xs text-amber-800">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong>Aviso de regla comercial:</strong> En servicios de limpieza profunda la pauta interna indica no cotizar por debajo del piso mínimo de <strong>{formatCurrency(minimumProfunda)}</strong>.
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Right Column: Live Quotation Summary & Actions (5 cols) */}
@@ -499,28 +428,9 @@ export function App() {
                   </p>
                 </div>
 
-                {/* Subtotal & Extras Breakdown */}
+                {/* Subtotal & Total Breakdown */}
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between text-slate-600">
-                    <span>Monto base del servicio:</span>
-                    <span className="font-semibold text-slate-900">{formatCurrency(calculation.baseAmount)}</span>
-                  </div>
-
-                  {form.isUrgent && (
-                    <div className="flex justify-between text-amber-700">
-                      <span>Recargo urgente (+20%):</span>
-                      <span className="font-semibold">+{formatCurrency(calculation.urgentAmount)}</span>
-                    </div>
-                  )}
-
-                  {form.noUtilities && (
-                    <div className="flex justify-between text-blue-700">
-                      <span>Inmueble sin luz/agua:</span>
-                      <span className="font-semibold">+{formatCurrency(calculation.noUtilitiesAmount)}</span>
-                    </div>
-                  )}
-
-                  <div className="border-t border-slate-100 pt-3 flex justify-between items-baseline">
+                  <div className="flex justify-between items-baseline">
                     <span className="text-sm font-bold text-slate-800">TOTAL PRESUPUESTADO:</span>
                     <span className="text-2xl font-black text-slate-900 tracking-tight">
                       {formatCurrency(calculation.totalAmount)}
@@ -554,21 +464,18 @@ export function App() {
                   </div>
                 </div>
 
-                {/* Included Tasks Preview */}
+                {/* Included Tasks Preview - All tasks visible */}
                 {form.serviceType === 'package' && selectedPackage && (
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                    <span className="font-semibold text-slate-700 block mb-1">Tareas comprendidas:</span>
-                    {selectedPackage.details.slice(0, 4).map((d, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-slate-600">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                        <span className="truncate">{d}</span>
-                      </div>
-                    ))}
-                    {selectedPackage.details.length > 4 && (
-                      <span className="text-[10px] text-slate-400 block pt-1 italic">
-                        +{selectedPackage.details.length - 4} tareas más incluidas en el presupuesto
-                      </span>
-                    )}
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2">
+                    <span className="font-semibold text-slate-800 block">Tareas comprendidas en el servicio:</span>
+                    <div className="space-y-1.5">
+                      {selectedPackage.details.map((d, i) => (
+                        <div key={i} className="flex items-start gap-2 text-slate-600">
+                          <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+                          <span>{d}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
